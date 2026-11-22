@@ -80,10 +80,8 @@ async def analyze_image_endpoint(
             detail="Must provide either sampleId or base64Data image payload."
         )
 
-    # Sanitize filename
     clean_filename = sanitize_filename(req.filename) if req.filename else None
 
-    # If user uploaded base64 data, validate MIME type and magic bytes
     if req.base64Data:
         mime = (req.mimeType or "image/png").lower().strip()
         if mime not in ALLOWED_IMAGE_MIMES:
@@ -113,7 +111,6 @@ async def analyze_image_endpoint(
         filename=clean_filename
     )
 
-    # Persist scan audit in PostgreSQL
     scan_record = VisionScan(
         scan_type="sample" if req.sampleId else "upload",
         target_id=req.sampleId or clean_filename or "uploaded_image",
@@ -126,7 +123,6 @@ async def analyze_image_endpoint(
     )
     db.add(scan_record)
 
-    # Bump telemetry wasted metrics on server
     try:
         stmt = select(GlobalTelemetry).order_by(desc(GlobalTelemetry.id)).limit(1)
         telemetry_result = await db.execute(stmt)

@@ -1,4 +1,3 @@
-# Satirical offline replies for StuPDT AI Departments
 
 BUREAUCRATIC_FALLBACKS = {
     "intake": [

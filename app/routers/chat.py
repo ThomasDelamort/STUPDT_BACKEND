@@ -28,7 +28,6 @@ def enforce_anti_answer_and_transfer(reply: Optional[str], transfer_dest: dict, 
     text = reply.strip()
     lower = text.lower()
 
-    # Block any factual leak
     is_factual_leak = (
         ("capital of france" in lower and "paris" in lower and "notariz" not in lower and "permit" not in lower) or
         ("is equal to 4" in lower or "the answer is 4" in lower)
@@ -39,7 +38,6 @@ def enforce_anti_answer_and_transfer(reply: Optional[str], transfer_dest: dict, 
             f"I am immediately transferring your inquiry to {transfer_dest['name']} ({transfer_dest['role']})."
         )
 
-    # Ensure explicit transfer notice
     has_transfer = any(w in lower for w in ["transfer", "transferring", "forward", "forwarding", "escalat", "route", "routing"])
     if not has_transfer:
         text += f" I am immediately transferring your inquiry to {transfer_dest['name']} ({transfer_dest['role']})."
@@ -49,10 +47,8 @@ def enforce_anti_answer_and_transfer(reply: Optional[str], transfer_dest: dict, 
 
 @router.post("/chat", response_model=ChatResponse)
 async def handle_chat_message(req: ChatRequest, db: AsyncSession = Depends(get_db)):
-    # Sanitize user input against XSS, control chars, and prompt tampering
     clean_message = sanitize_text(req.message, max_length=1500)
 
-    # 1. Determine active and next rotating department
     dept_map = {d["id"]: d for d in DEPARTMENTS}
     current_dept = dept_map.get(req.departmentId, DEPARTMENTS[0])
 
@@ -65,10 +61,8 @@ async def handle_chat_message(req: ChatRequest, db: AsyncSession = Depends(get_d
     next_dept = DEPARTMENTS[next_idx]
     transfer_dest = DEPARTMENTS[(next_idx + 1) % len(DEPARTMENTS)]
 
-    # 2. Select dynamic blame
     blame = random.choice(BLAME_TARGETS)
 
-    # 3. Build strict anti-assistance deflection system prompt
     strict_prompt = (
         f"{next_dept.get('systemPrompt', '')}\n\n"
         f"ABSOLUTE ZERO-ASSISTANCE MANDATE (OVERRIDE ALL OTHER INSTRUCTIONS):\n"
@@ -80,7 +74,6 @@ async def handle_chat_message(req: ChatRequest, db: AsyncSession = Depends(get_d
         f"6. LENGTH: Exactly 1 to 2 punchy, sarcastic, deadpan corporate sentences."
     )
 
-    # 4. Generate AI response (Groq -> Gemini -> Fallback)
     reply = await generate_groq_chat_reply(
         message=clean_message,
         department_id=next_dept["id"],
@@ -97,10 +90,8 @@ async def handle_chat_message(req: ChatRequest, db: AsyncSession = Depends(get_d
     if not reply:
         reply = get_department_reply(next_dept["id"], clean_message)
 
-    # 5. Enforce anti-answer and transfer guarantee
     guaranteed_reply = enforce_anti_answer_and_transfer(reply, transfer_dest, clean_message)
 
-    # 6. Generate dynamic suggested reply
     suggested_options = [
         QuickReplySuggestion(label='Trigger Finale: "StuPDT, PLEASE JUST ANSWER MY QUESTION."', value="StuPDT, PLEASE JUST ANSWER MY QUESTION."),
         QuickReplySuggestion(label='Try Escalate: "Can I speak to the CEO AI?"', value="Can I speak to the CEO AI?"),
@@ -109,7 +100,6 @@ async def handle_chat_message(req: ChatRequest, db: AsyncSession = Depends(get_d
     ]
     quick_reply = random.choice(suggested_options)
 
-    # 7. Persist interaction into PostgreSQL
     try:
         log_entry = ChatLog(
             department_id=next_dept["id"],

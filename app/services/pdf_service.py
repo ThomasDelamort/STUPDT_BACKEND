@@ -24,17 +24,12 @@ def generate_official_apology_pdf(
     c = canvas.Canvas(buf, pagesize=letter)
     width, height = letter
 
-    # =========================================================================
-    # PAGE 1: OFFICIAL CERTIFICATE OF CORPORATE REGRET
-    # =========================================================================
-    # Double Border
     c.setStrokeColor(colors.HexColor("#071638"))
     c.setLineWidth(3)
     c.rect(36, 36, width - 72, height - 72)
     c.setLineWidth(1)
     c.rect(42, 42, width - 84, height - 84)
 
-    # Watermark
     c.saveState()
     c.setFont("Helvetica-Bold", 38)
     c.setFillColor(colors.HexColor("#F2F5F8"))
@@ -43,7 +38,6 @@ def generate_official_apology_pdf(
     c.drawCentredString(0, 0, "CERTIFIED ZERO LIABILITY")
     c.restoreState()
 
-    # Header
     c.setFillColor(colors.HexColor("#071638"))
     c.setFont("Helvetica-Bold", 15)
     c.drawCentredString(width / 2, height - 75, "STUPDT BUREAUCRACY & DEFLECTION SOLUTIONS™")
@@ -51,7 +45,6 @@ def generate_official_apology_pdf(
     c.setFillColor(colors.HexColor("#555555"))
     c.drawCentredString(width / 2, height - 89, "Department of Inaction, Circular Reasoning & Customer Exhaustion")
 
-    # Certificate Title
     c.setFillColor(colors.HexColor("#F52820"))
     c.setFont("Helvetica-Bold", 19)
     c.drawCentredString(width / 2, height - 128, "OFFICIAL CERTIFICATE OF EXECUTIVE REGRET")
@@ -59,12 +52,10 @@ def generate_official_apology_pdf(
     c.setFillColor(colors.HexColor("#666666"))
     c.drawCentredString(width / 2, height - 143, f"FORM AP-999 // CASE ID: {case_id}")
 
-    # Divider
     c.setStrokeColor(colors.HexColor("#0EC7F5"))
     c.setLineWidth(1.5)
     c.line(60, height - 158, width - 60, height - 158)
 
-    # Presentation Line
     c.setFillColor(colors.HexColor("#071638"))
     c.setFont("Helvetica-Bold", 10)
     c.drawString(70, height - 188, "THIS NON-BINDING CONDOLENCE IS SOLEMNLY GRANTED TO:")
@@ -72,7 +63,6 @@ def generate_official_apology_pdf(
     c.setFillColor(colors.HexColor("#0EC7F5"))
     c.drawString(70, height - 212, name[:45].upper())
 
-    # Case Metadata Box
     c.setStrokeColor(colors.HexColor("#E2E8F0"))
     c.setFillColor(colors.HexColor("#F8FAFC"))
     c.rect(70, height - 275, width - 140, 50, fill=True, stroke=True)
@@ -91,7 +81,6 @@ def generate_official_apology_pdf(
     c.setFillColor(colors.HexColor("#F52820"))
     c.drawString(185, height - 270, "0.00% RESOLVED • 100.00% SYMBOLIC SYNERGY")
 
-    # Certificate Body
     c.setFillColor(colors.HexColor("#1E293B"))
     c.setFont("Helvetica", 9.5)
     body_lines = [
@@ -114,7 +103,6 @@ def generate_official_apology_pdf(
         c.drawString(70, y, line)
         y -= 14
 
-    # Red Rubber Stamp Graphic
     c.saveState()
     c.setStrokeColor(colors.HexColor("#F52820"))
     c.setFillColor(colors.HexColor("#F52820"))
@@ -128,7 +116,6 @@ def generate_official_apology_pdf(
     c.drawCentredString(stamp_x, stamp_y - 12, "VOID UPON PRINT")
     c.restoreState()
 
-    # Signatures
     c.setStrokeColor(colors.HexColor("#334155"))
     c.setLineWidth(1)
     c.line(70, 140, 220, 140)
@@ -142,7 +129,6 @@ def generate_official_apology_pdf(
     c.drawString(70, 114, "StuPDT Executive Board #009")
     c.drawString(250, 114, "Disposal Division • Shredder AI")
 
-    # Barcode representation & Footer
     c.setStrokeColor(colors.HexColor("#071638"))
     c.setLineWidth(1)
     bx = 70
@@ -156,15 +142,10 @@ def generate_official_apology_pdf(
 
     c.showPage()
 
-    # =========================================================================
-    # PAGE 2: BLAME DISTRIBUTION ENGINE™ OFFICIAL AUDIT
-    # =========================================================================
-    # Border
     c.setStrokeColor(colors.HexColor("#071638"))
     c.setLineWidth(1.5)
     c.rect(40, 40, width - 80, height - 80)
 
-    # Header
     c.setFont("Helvetica-Bold", 12)
     c.setFillColor(colors.HexColor("#071638"))
     c.drawString(60, height - 70, "STUPDT BLAME DISTRIBUTION ENGINE™ // ROOT CAUSE AUDIT")
@@ -216,9 +197,6 @@ def generate_official_apology_pdf(
     c.drawString(60, 54, f"DIGITAL VERIFICATION HASH: {uuid.uuid4().hex} • PAGE 2 OF 3")
     c.showPage()
 
-    # =========================================================================
-    # PAGE 3: CERTIFICATE OF IMMEDIATE VIRTUAL DESTRUCTION
-    # =========================================================================
     c.setStrokeColor(colors.HexColor("#071638"))
     c.setLineWidth(1.5)
     c.rect(40, 40, width - 80, height - 80)
@@ -259,7 +237,6 @@ def generate_official_apology_pdf(
         c.drawString(60, y, line)
         y -= 14
 
-    # Large Green Stamp
     c.saveState()
     c.setStrokeColor(colors.HexColor("#1FE03F"))
     c.setFillColor(colors.HexColor("#1FE03F"))

@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 
 
 class GeminiProxyRequest(BaseModel):
-    mode: str = Field("chat", max_length=20)  # "chat" or "vision"
+    mode: str = Field("chat", max_length=20)
     userText: Optional[str] = Field(None, max_length=2000)
     systemPrompt: Optional[str] = Field(None, max_length=4000)
     mimeType: Optional[str] = Field("image/png", max_length=50)

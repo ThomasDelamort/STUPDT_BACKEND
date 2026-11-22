@@ -12,8 +12,8 @@ class VisionScan(Base):
     __tablename__ = "vision_scans"
 
     id = Column(Integer, primary_key=True, index=True)
-    scan_type = Column(String(50), nullable=False)  # "sample" or "upload"
-    target_id = Column(String(200), nullable=True)  # sampleId or filename
+    scan_type = Column(String(50), nullable=False)
+    target_id = Column(String(200), nullable=True)
     detected_item = Column(String(200), nullable=False)
     category = Column(String(200), nullable=False)
     confidence = Column(String(50), default="100.00%", nullable=False)

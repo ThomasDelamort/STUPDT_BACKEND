@@ -18,12 +18,10 @@ async def submit_bureaucracy_form(
         "Form 001-C to be notarized BEFORE you started filling out Form 001."
     )
 
-    # Sanitize user inputs before recording into database
     clean_problem = sanitize_text(req.problem, max_length=500)
     clean_reason = sanitize_text(req.reason, max_length=500)
     clean_notarized_code = sanitize_text(req.notarizedCode, max_length=100)
 
-    # Record submission into PostgreSQL
     try:
         submission = BureaucracySubmission(
             problem=clean_problem,

@@ -26,7 +26,6 @@ async def download_official_apology_pdf(
 
     pdf_bytes = generate_official_apology_pdf(recipient_name=clean_name, case_reason=clean_reason)
 
-    # Bump wasted metrics on server
     try:
         stmt = select(GlobalTelemetry).order_by(desc(GlobalTelemetry.id)).limit(1)
         res = await db.execute(stmt)

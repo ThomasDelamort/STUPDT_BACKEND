@@ -23,11 +23,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize PostgreSQL tables automatically on startup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    # Dispose connection pool on shutdown
     await engine.dispose()
 
 
@@ -38,10 +36,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# 1. Security Headers, Rate Limiting & Body Size Enforcement Middleware
 app.add_middleware(SecurityMiddleware)
 
-# 2. CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -51,7 +47,6 @@ app.add_middleware(
 )
 
 
-# 3. Global Exception Handler (prevents stack trace & credential leaks)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.exception("Unhandled server exception on %s: %s", request.url.path, exc)
@@ -65,7 +60,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# 4. Register Routers
 app.include_router(health_router)
 app.include_router(chat_router)
 app.include_router(bureaucracy_router)

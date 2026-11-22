@@ -92,7 +92,6 @@ def extract_image_specs(data_bytes: bytes) -> Dict[str, Any]:
     if len(data_bytes) < 16:
         return specs
 
-    # PNG: 89 50 4E 47 0D 0A 1A 0A
     if data_bytes.startswith(b"\x89PNG\r\n\x1a\n") and len(data_bytes) >= 24:
         specs["format"] = "PNG"
         w, h = struct.unpack(">II", data_bytes[16:24])
@@ -100,7 +99,6 @@ def extract_image_specs(data_bytes: bytes) -> Dict[str, Any]:
         specs["height"] = h
         return specs
 
-    # GIF: GIF87a or GIF89a
     if data_bytes.startswith(b"GIF87a") or data_bytes.startswith(b"GIF89a"):
         specs["format"] = "GIF"
         w, h = struct.unpack("<HH", data_bytes[6:10])
@@ -108,14 +106,13 @@ def extract_image_specs(data_bytes: bytes) -> Dict[str, Any]:
         specs["height"] = h
         return specs
 
-    # JPEG
     if data_bytes.startswith(b"\xff\xd8"):
         specs["format"] = "JPEG"
         try:
             offset = 2
             while offset < len(data_bytes) - 4:
                 marker, length = struct.unpack(">2sH", data_bytes[offset:offset+4])
-                if marker in [b"\xff\xc0", b"\xff\xc2"]:  # SOF0, SOF2
+                if marker in [b"\xff\xc0", b"\xff\xc2"]:
                     h, w = struct.unpack(">HH", data_bytes[offset+5:offset+9])
                     specs["width"] = w
                     specs["height"] = h
@@ -125,7 +122,6 @@ def extract_image_specs(data_bytes: bytes) -> Dict[str, Any]:
             pass
         return specs
 
-    # WEBP: RIFF....WEBP
     if data_bytes.startswith(b"RIFF") and b"WEBP" in data_bytes[:16]:
         specs["format"] = "WebP"
         return specs
@@ -210,7 +206,6 @@ async def analyze_with_groq_vision_llm(
             resp = await client.post(GROQ_CHAT_URL, headers=headers, json=payload)
             if resp.status_code == 200:
                 raw_text = resp.json()["choices"][0]["message"]["content"].strip()
-                # Clean up any potential markdown wrapper
                 json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
                 if json_match:
                     parsed = json.loads(json_match.group(0))
@@ -234,10 +229,8 @@ async def analyze_vision_payload(
     """Unified Vision backend analysis engine with multi-tier intelligence & fallbacks."""
     import random
 
-    # 1. Preset Sample Inspection
     if sample_id and sample_id in SAMPLE_CATALOG:
         sample_meta = SAMPLE_CATALOG[sample_id]
-        # Check if Groq can generate a live custom variation
         groq_result = await analyze_with_groq_vision_llm(
             filename=f"{sample_id}.png",
             specs={"format": "PNG", "width": 800, "height": 800, "size_kb": 128},
@@ -246,24 +239,20 @@ async def analyze_vision_payload(
         if groq_result:
             return groq_result
 
-        # Rotate through pre-certified catalog variants
         variants = sample_meta.get("variants", [])
         if variants:
             return random.choice(variants)
 
-    # 2. Uploaded Image Inspection
     specs = {"size_kb": 0, "width": None, "height": None, "format": "Digital Image"}
     clean_b64 = None
     if base64_data:
         try:
-            # Strip potential data URL prefix if sent
             clean_b64 = base64_data.split(",")[-1]
             raw_bytes = base64.b64decode(clean_b64)
             specs = extract_image_specs(raw_bytes)
         except Exception as exc:
             logger.warning("Could not decode base64 image bytes: %s", exc)
 
-    # 2.5 True Multimodal Computer Vision (if Gemini key configured)
     if clean_b64 and settings.GEMINI_API_KEY:
         try:
             from app.services.gemini_service import analyze_vision_image
@@ -274,7 +263,6 @@ async def analyze_vision_payload(
         except Exception as exc:
             logger.warning("Gemini multimodal vision failed: %s", exc)
 
-    # 3. Call Groq with specs and filename
     groq_result = await analyze_with_groq_vision_llm(
         filename=filename,
         specs=specs,
@@ -283,5 +271,4 @@ async def analyze_vision_payload(
     if groq_result:
         return groq_result
 
-    # 4. Fallback to procedural deadpan corporate engine
     return procedural_fallback_diagnosis(filename=filename, specs=specs, sample_id=sample_id)

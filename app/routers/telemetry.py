@@ -15,7 +15,6 @@ async def get_metrics(db: AsyncSession = Depends(get_db)):
     record = result.scalar_one_or_none()
 
     if not record:
-        # Initialize default baseline record in PostgreSQL if not present
         record = GlobalTelemetry(
             specialists_consulted=1,
             internal_meetings=14,

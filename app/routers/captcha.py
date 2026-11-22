@@ -124,7 +124,6 @@ LEGAL_MATH_PROBLEMS = [
     },
 ]
 
-# Server-side challenge store (challenge_id -> state)
 SERVER_CHALLENGES: Dict[str, Dict[str, Any]] = {}
 
 
@@ -151,17 +150,14 @@ class VerifyMathRequest(BaseModel):
 async def generate_captcha_challenge(exclude: str | None = None):
     cleanup_expired_challenges()
 
-    # Select random category
     eligible = [c for c in CAPTCHA_CATEGORIES if c["targetType"] != exclude]
     category = random.choice(eligible or CAPTCHA_CATEGORIES)
 
-    # 3 target items
     target_items = [
         {"iconType": item["iconType"], "label": item["label"], "is_target": True}
         for item in category["items"][:3]
     ]
 
-    # 6 distractors
     distractors_pool = [d for d in CAPTCHA_DISTRACTORS if d["iconType"] != category["targetType"]]
     random.shuffle(distractors_pool)
     distractor_items = [
@@ -169,7 +165,6 @@ async def generate_captcha_challenge(exclude: str | None = None):
         for d in distractors_pool[:6]
     ]
 
-    # Combine and shuffle
     combined = target_items + distractor_items
     random.shuffle(combined)
 
@@ -180,15 +175,12 @@ async def generate_captcha_challenge(exclude: str | None = None):
             "id": idx,
             "iconType": item["iconType"],
             "label": item["label"]
-            # Notice: is_target is NEVER sent to the client!
         })
         if item["is_target"]:
             correct_ids.append(idx)
 
-    # Select random math problem
     math_prob = random.choice(LEGAL_MATH_PROBLEMS)
 
-    # Store server-side verification record
     challenge_id = str(uuid.uuid4())
     SERVER_CHALLENGES[challenge_id] = {
         "targetType": category["targetType"],
@@ -209,7 +201,6 @@ async def generate_captcha_challenge(exclude: str | None = None):
         "mathProblem": {
             "id": math_prob["id"],
             "question": math_prob["question"]
-            # Notice: answer and hint are NEVER sent to the client!
         }
     }
 
@@ -246,7 +237,6 @@ async def verify_captcha_math(req: VerifyMathRequest):
         }
 
     if req.answer.strip() == challenge["mathAnswer"]:
-        # Consume the challenge so it cannot be reused
         SERVER_CHALLENGES.pop(req.challengeId, None)
         return {
             "approved": True,

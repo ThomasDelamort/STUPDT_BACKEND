@@ -35,7 +35,6 @@ async def proxy_gemini_request(req: GeminiProxyRequest):
             configured=True
         )
 
-    # Chat mode (Groq -> Gemini -> Fallback)
     user_text = req.userText or "Hello"
     reply = await generate_groq_chat_reply(
         message=user_text,
